@@ -14,7 +14,7 @@ try:
     # Acceder a la página web
     driver.get(url)
 
-    # Función para extraer detalles de un elemento web
+    # Extraer detalles de un elemento web
     def obtener_detalles_elemento(elemento):
         try:
             detalles = {
