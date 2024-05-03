@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 # archivo csv
-.csv
+*.csv
 
 # Distribution / packaging
 .Python
@@ -154,6 +154,9 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+#upload file folder
+files_uploaded/
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
