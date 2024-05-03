@@ -5,6 +5,7 @@ from selenium import webdriver
 from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoAlertPresentException
+from selenium.webdriver.common.keys import Keys
 
 @pytest.fixture(scope='session')
 def driver():
@@ -12,6 +13,7 @@ def driver():
     driver.get("http://127.0.0.1:5500/app/tests/selenium/htmlPages/loginPageTest.html")
     yield driver
     driver.quit()
+
 
 def test_login_page_title(driver):
     """Verifica que el título de la página de inicio de sesión sea correcto"""
@@ -21,6 +23,8 @@ def test_login_page_title(driver):
 #     """Verificar que el título de la página de inicio de sesión sea incorrecto"""
 #     assert "Título Incorrecto" not in driver.title
 
+
+#
 def test_login_with_valid_credentials(driver):
     """Prueba que el usuario pueda iniciar sesión con credenciales válidas"""
     text_box_user = driver.find_element(by=By.ID, value="user")
@@ -67,6 +71,30 @@ def test_login_with_invalid_credentials(driver):
     # current_url = driver.current_url
     # print(current_url)
     # assert "http://127.0.0.1:5500/htmlPages/loginPageTest.html" in current_url
+
+
+# Comprobar que las imágenes estén cargadas
+def test_loading_images(driver):
+    driver.get('http://127.0.0.1:5500/app/tests/selenium/htmlPages/mainPageTest.html')
+    imagenes = driver.find_elements(by=By.ID, value="img")
+    for imagen in imagenes:
+        assert imagen.is_displayed(), "La imagen no se ha cargado correctamente"
+
+ 
+# Comprobar titulo
+def test_main_page_title(driver):
+    driver.get('http://127.0.0.1:5500/app/tests/selenium/htmlPages/mainPageTest.html')
+    elemento_titulo = driver.find_element(by=By.ID, value="titulo")
+    texto_esperado = "AutoRefine"
+    assert elemento_titulo.text == texto_esperado, f"El texto del título es '{elemento_titulo.text}', pero se esperaba '{texto_esperado}'"
+
+# Comprobar los párrafos
+def test_paragraph_quantity(driver):
+    driver.get('http://127.0.0.1:5500/app/tests/selenium/htmlPages/mainPageTest.html')
+    parrafos_esperados = 2
+    parrafos = driver.find_elements(by=By.TAG_NAME, value="p")
+    assert len(parrafos) == parrafos_esperados, f"La cantidad de párrafos no es la esperada. Se esperaban {parrafos_esperados}, pero se encontraron {len(parrafos)}"
+
 
 # def test_detect_changes_in_page_elements(driver):
 #     """Prueba que el framework pueda detectar cambios en los elementos de la página"""
