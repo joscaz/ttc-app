@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 driver = webdriver.Edge()
 
 # driver.get("https://www.selenium.dev/selenium/web/web-form.html")
-driver.get("http://127.0.0.1:5500/htmlPages/loginPageTest.html")
+driver.get("http://127.0.0.1:5500/app/tests/selenium/htmlPages/loginPageTest.html")
 
 title = driver.title
 
