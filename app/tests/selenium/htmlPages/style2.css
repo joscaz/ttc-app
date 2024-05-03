@@ -1,0 +1,96 @@
+/* Estilos para centrar la imagen y el título */
+img[src="TTC-Logo.png"] {
+    display: block;
+    margin: 0 auto;
+    width: 250px; /* Ancho deseado */
+    height: auto; /* Altura automática para mantener la proporción */
+}
+
+
+h1 {
+    text-align: center;
+    font-size: 50px;
+    color:aquamarine;
+    font-weight: bolder;
+    margin-bottom: 0 auto;
+}
+
+.mission-vision {
+    display: flex; /* Utilizamos flexbox para alinear los elementos en la misma línea */
+    justify-content: center;
+}
+
+/* Estilos para cada título de la sección Mision y Vision */
+.mission-vision h2 {
+    margin-right: 250px; /* Margen derecho para separar los títulos */
+    margin-left: 250px;
+}
+
+/* Estilos para la misión y visión */
+h2 {
+    color:aquamarine;
+    font-size: 50px;
+}
+
+p {
+    display: inline-block;
+    vertical-align: top;
+    width: 48%; /* Para dejar espacio para los bordes y espacios entre los elementos */
+    margin: 0;
+    padding: 0;
+    color: whitesmoke;
+    font-size: 25px;
+}
+
+/* Estilos para los objetivos */
+ul {
+    margin-top: 30px;
+    list-style-type: none;
+    margin: 40px 0;
+    padding: 0;
+    font-size: 30px;
+    margin-bottom: 30px;
+    justify-content: center;
+}
+
+ul li {
+    margin-bottom: 10px;
+    color: whitesmoke;
+}
+
+ul li b {
+    color: aquamarine;
+}
+
+.PTC h3 {
+    color:aquamarine;
+    font-size: 30px;
+    display: inline-block;
+    vertical-align: top;
+    margin: 0;
+    padding: 0;
+    margin-left: 25px;
+    margin-right: 20px;
+    width: 30%; /* Ancho ajustable según tu diseño */
+}
+
+.Logos img {
+    align-content: center;
+    width: 250px; /* Ancho deseado */
+    height: auto; /* Altura automática para mantener la proporción */
+    margin-left: 80px;
+    margin-right: 80px;
+}
+
+.nombres h4 {
+    color: whitesmoke;
+    font-size: 20px;
+    display: inline-block;
+    vertical-align: top;
+    margin: 0;
+    padding: 0;
+    margin-left: 20px;
+    margin-right: 20px;
+    width: 30%; /* Ancho ajustable según tu diseño */
+}
+

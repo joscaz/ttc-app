@@ -1,42 +1,35 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Pagina de pruebas</title>
-    <link rel="stylesheet" href="style1.css" />
-  </head>
+    <head>
+        <title>Pagina de pruebas</title>
+        <link rel="stylesheet" href="style1.css">
+    </head>
 
-  <body>
-    <div class="container">
-      <img src="./images/TTC-Logo.png" alt="TTC Logo" />
-      <form>
-        <label for="user">Usuario:</label><br />
-        <input type="text" id="user" name="user" /><br />
-        <label for="password">Contraseña:</label><br />
-        <input type="password" id="pswd" name="pswd" /><br /><br />
-        <input
-          type="submit"
-          id="submit_btn"
-          value="Iniciar sesión"
-          onclick="checkPswd();"
-        />
-      </form>
-    </div>
-  </body>
+    <body>
+        <div class="container">
+            <!-- <img src="TTC-Logo.png" alt="TTC Logo"> -->
+            <form>
+                <label for="user">Usuario:</label><br>
+                <input type="text" id="user" name="user"><br>
+                <label for="password">Contraseña:</label><br>
+                <input type="password" id="pswd" name="pswd"><br><br>
+                <input type="submit" value="Iniciar sesión" onclick="checkPswd();">
+            </form>
+        </div>
+    </body>
 </html>
 
 <!--Function to check password the already set password is admin-->
 <script type="text/javascript">
-  function checkPswd() {
-    var checkData = "admin";
-    var user = document.getElementById("user").value;
-    var password = document.getElementById("pswd").value;
-    if (password == checkData && user == checkData) {
-      window.open("mainPageTest.html", "_blank");
-      window.close();
-    } else {
-      alert(
-        "El usuario o el password no estan correctos. Por favor, verifique los datos."
-      );
+    function checkPswd(){
+        var checkData = "admin";
+        var user = document.getElementById("user").value;
+        var password = document.getElementById("pswd").value;
+        if (password == checkData && user == checkData) {
+            window.open("mainPageTest.html", "_blank"); 
+        }
+        else{
+            alert("El usuario o el password no estan correctos. Por favor, verifique los datos.");
+        }
     }
-  }
 </script>
