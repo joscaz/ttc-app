@@ -2,17 +2,91 @@ from app import db
 from app.api.model import Codigo, Reporte, Prueba
 import csv
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.remote.webelement import WebElement
+import pandas as pd
 import logging
 import datetime
-from app.api.utils import (compare_elements, wait_for_page_load, capture_element_data)
+# from app.api.utils import (compare_elements, wait_for_page_load, capture_element_data)
 
 # Configuración del logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def process_with_selenium(original_url, filepath):
-    driver = webdriver.Edge()  # Asegúrate de tener el driver correspondiente configurado
+def wait_for_page_load(driver):
+    WebDriverWait(driver, 10).until(
+        lambda d: d.execute_script('return document.readyState') == 'complete'
+    )
+
+def capture_element_data(elements):
+    return [{'tag': e.tag_name, 'text': e.text, 'attributes': e.get_attribute('outerHTML'), 'xpath': e.get_attribute('xpath')} for e in elements]
+
+def check_critical_locators(driver, locators):
+    broken_locators = []
+    for locator in locators:
+        try:
+            driver.find_element(By.XPATH, locator)
+        except NoSuchElementException:
+            broken_locators.append(locator)
+    return broken_locators
+
+# critical_locators = [
+#     '//img[@alt="TTC Logo"]',
+#     '//h1[@id="titulo"]',
+#     '//div[@class="mission-vision"]/h2[1]',
+#     '//div[@class="mission-vision"]/h2[2]',
+#     '//p[@id="adios"]',
+#     '//img[@alt="Python"]',
+#     '//img[@alt="Selenium"]',
+#     '//img[@alt="AWS"]',
+#     '//div[@class="nombres"]/h4[1]',
+#     '//div[@class="nombres"]/h4[2]',
+#     '//div[@class="nombres"]/h4[3]'
+#     # Añade otros XPaths críticos aquí.
+# ]
+
+def get_xpath_for_element(element: WebElement) -> str:
+    """
+    Generate a more specific XPath for a given web element by incorporating attributes like 'id' and 'class'.
+    """
+    parts = []
+    while element.tag_name != 'html':
+        part = element.tag_name
+        # Añadir atributos 'id' o 'class' si están presentes para hacer el XPath más específico.
+        id_ = element.get_attribute('id')
+        class_ = element.get_attribute('class')
+        if id_:
+            part += f"[@id='{id_}']"
+        elif class_:
+            class_ = class_.split()[0]  # Usar solo la primera clase si hay varias
+            part += f"[@class='{class_}']"
+        else:
+            # Contar la posición relativa entre los elementos hermanos del mismo tipo
+            siblings = element.find_elements(By.XPATH, f'./preceding-sibling::{element.tag_name}') + element.find_elements(By.XPATH, f'./following-sibling::{element.tag_name}')
+            if siblings:
+                index = len(element.find_elements(By.XPATH, f'./preceding-sibling::{element.tag_name}')) + 1
+                part += f"[{index}]"
+        parts.insert(0, part)
+        element = element.find_element(By.XPATH, '..')
+    return '//' + '/'.join(parts)
+
+def capture_all_locators(driver, url):
+    driver.get(url)
+    elements = driver.find_elements(By.XPATH, '//*')
+    locators = [get_xpath_for_element(e) for e in elements if e.tag_name != 'html']
+    return locators
+
+def compare_files_and_generate_report(new_file_path, original_url, file_content, id_prueba):
+    # Configurar el WebDriver
+    driver = webdriver.Edge()
+    
     try:
+        new_code = Codigo(nombre_archivo='archivo_a_probar', contenido=file_content)
+        db.session.add(new_code)
+        db.session.commit()  # Asegúrate de que se guarda correctamente y obtiene un ID
+
+        critical_locators = capture_all_locators(driver, original_url)
         # Cargar la página original
         driver.get(original_url)
         wait_for_page_load(driver)
@@ -20,42 +94,85 @@ def process_with_selenium(original_url, filepath):
         original_data = capture_element_data(original_elements)
 
         # Cargar la página del archivo subido
-        driver.get('file:///' + filepath)
+        driver.get('file:///' + new_file_path)
         wait_for_page_load(driver)
         new_elements = driver.find_elements(By.XPATH, '//*')
         new_data = capture_element_data(new_elements)
-    
-        differences = compare_elements(original_data, new_data)
-    
-        if not isinstance(differences, dict):
-            logging.error(f"Expected a dictionary from compare_elements, got {type(differences)}")
 
-        # Guardar los resultados en un CSV
-        with open("differences_report.csv", "w", newline='', encoding='utf-8') as file:
-            writer = csv.writer(file)
-            writer.writerow(['Element ID', 'Attribute', 'Original Value', 'New Value'])
-            for el_id, attrs in differences.items():
-                for attr, values in attrs.items():
-                    original = values.get('old_value', 'N/A')
-                    new = values.get('new_value', 'N/A')
-                    writer.writerow([el_id, attr, original, new])
+        # Comparar los datos capturados
+        differences = []
+        for original, new in zip(original_data, new_data):
+            if original['text'] != new['text'] or original['attributes'] != new['attributes']:
+                differences.append({'Original': original, 'New': new})
 
-        return differences
-    except Exception as e:
-        logging.error(f"Exception occurred: {str(e)}")
+        # Verificar localizadores críticos en la página nueva
+        broken_locators = check_critical_locators(driver, critical_locators)
+        total_changes = len(differences)
 
+        # Crear reporte xlsx solo con locators rotos
+        df = pd.DataFrame(broken_locators, columns=['Broken Locators'])
+        if df.empty:
+            df.loc[0] = ['No broken locators found']
+        else:
+            df.loc[len(df)] = {'Broken Locators': f'Total broken locators: {len(broken_locators)}'}
+        report_path = 'prueba.xlsx'
+        df.to_excel(report_path, index=False)
+
+        # Instanciar y guardar el reporte
+        new_report = Reporte(contenido=str(broken_locators),id_prueba=id_prueba, id_codigo=new_code.id_codigo)
+        db.session.add(new_report)
+        db.session.commit()
+
+        return report_path, total_changes, broken_locators
     finally:
         driver.quit()
 
-def save_report_and_code(filename, report, filepath, id_prueba):
-    # Leer el contenido del archivo si es necesario
-    with open(filepath, 'r', encoding='utf-8') as file:
-        content = file.read()
+# def process_with_selenium(original_url, filepath):
+#     driver = webdriver.Edge()  # Asegúrate de tener el driver correspondiente configurado
+#     try:
+#         # Cargar la página original
+#         driver.get(original_url)
+#         wait_for_page_load(driver)
+#         original_elements = driver.find_elements(By.XPATH, '//*')
+#         original_data = capture_element_data(original_elements)
 
-    new_code = Codigo(nombre_archivo=filename, contenido=content)  # Cambia 'filepath' por 'content' si es necesario
-    db.session.add(new_code)
-    db.session.flush()  # Para obtener el id_codigo después de insertar
+#         # Cargar la página del archivo subido
+#         driver.get('file:///' + filepath)
+#         wait_for_page_load(driver)
+#         new_elements = driver.find_elements(By.XPATH, '//*')
+#         new_data = capture_element_data(new_elements)
+    
+#         differences = compare_elements(original_data, new_data)
+    
+#         if not isinstance(differences, dict):
+#             logging.error(f"Expected a dictionary from compare_elements, got {type(differences)}")
 
-    new_report = Reporte(contenido=str(report), id_prueba=id_prueba, id_codigo=new_code.id_codigo)
-    db.session.add(new_report)
-    db.session.commit()
+#         # Guardar los resultados en un CSV
+#         with open("differences_report.csv", "w", newline='', encoding='utf-8') as file:
+#             writer = csv.writer(file)
+#             writer.writerow(['Element ID', 'Attribute', 'Original Value', 'New Value'])
+#             for el_id, attrs in differences.items():
+#                 for attr, values in attrs.items():
+#                     original = values.get('old_value', 'N/A')
+#                     new = values.get('new_value', 'N/A')
+#                     writer.writerow([el_id, attr, original, new])
+
+#         return differences
+#     except Exception as e:
+#         logging.error(f"Exception occurred: {str(e)}")
+
+#     finally:
+#         driver.quit()
+
+# def save_report_and_code(filename, report, filepath, id_prueba):
+#     # Leer el contenido del archivo si es necesario
+#     with open(filepath, 'r', encoding='utf-8') as file:
+#         content = file.read()
+
+#     new_code = Codigo(nombre_archivo=filename, contenido=content)  # Cambia 'filepath' por 'content' si es necesario
+#     db.session.add(new_code)
+#     db.session.flush()  # Para obtener el id_codigo después de insertar
+
+#     new_report = Reporte(contenido=str(report), id_prueba=id_prueba, id_codigo=new_code.id_codigo)
+#     db.session.add(new_report)
+#     db.session.commit()
