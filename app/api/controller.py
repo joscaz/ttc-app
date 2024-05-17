@@ -1,11 +1,13 @@
 from app import db
 from app.api.model import Codigo, Reporte, Prueba
-import csv
+from app.controller import validate_schema_data
+from app.api.schema import CodigoSchema, ReporteSchema, PruebaSchema, prueba_dump_schema, prueba_load_schema
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.remote.webelement import WebElement
+# from sqlalchemy.exc import SQLAlchemyError
 import pandas as pd
 import logging
 import datetime
@@ -126,3 +128,25 @@ def compare_files_and_generate_report(new_file_path, original_url, file_content,
         return report_path, total_changes, broken_locators
     finally:
         driver.quit()
+
+def getPruebas():
+    pruebas = Prueba.query.all()
+    prueba_schema = PruebaSchema(many=True)
+    all_pruebas = prueba_schema.dump(pruebas)
+    count = Prueba.query.count()
+    return count, all_pruebas
+    
+def getPruebaById(id):
+    prueba = Prueba.query.filter_by(id_prueba=id).first()
+    prueba_schema = PruebaSchema()
+    prueba_dumped = prueba_schema.dump(prueba)
+    return prueba_dumped
+
+def editPruebaById(id, data):
+    Prueba.query.filter_by(id_prueba=id).update(data)
+    db.session.commit()
+    return Prueba.query.filter_by(id_prueba=id).first()
+
+def deletePrueba(prueba):
+    prueba.delete()
+    db.session.commit()

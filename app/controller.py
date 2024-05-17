@@ -1,6 +1,7 @@
 from app import flask_app
 from werkzeug.exceptions import HTTPException
 from flask import Blueprint, request, current_app, jsonify, g
+from marshmallow import ValidationError
 
 def get_url_prefix():
   url_prefix = '/ttc-api/'
@@ -15,6 +16,15 @@ def log_request_error(request_data, code):
     current_app.logger.error(f"Method: {request_data['method']}")
     current_app.logger.error(f"Headers: {request_data['headers']}")
     current_app.logger.error(f'Request Data: {request_data["data"]}')
+
+def validate_schema_data(schema, data):
+  try:
+    loaded_data = schema.load(data)
+  except ValidationError as err:
+    raise RequestException(message=err.messages, code=400)
+  
+  return loaded_data
+
 
 def get_request_data():
     # Access request data
