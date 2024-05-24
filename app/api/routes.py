@@ -1,6 +1,6 @@
 from flask import jsonify, request, current_app, Response
 from app.api.controller import (compare_files_and_generate_report, getPruebas, getPruebaById, editPruebaById, deletePrueba)
-from app.api.controller import validate_schema_data
+from app.api.controller import (validate_schema_data, RequestException)
 # from app.api.utils import (format_report)
 from app.api.schema import prueba_load_schema, prueba_dump_schema
 from app.api.dummy import (create_dummy_pruebas)
@@ -18,6 +18,8 @@ def get_version():
 def upload_and_compare_file():
     file = request.files['file']
     original_url = request.form.get('original_url')
+    # ids_pruebas_str = request.form.get('id_pruebas')  # IDs como cadena separada por comas
+    # id_pruebas = [int(id) for id in ids_pruebas_str.split(',') if id.strip().isdigit()]
     id_prueba = request.form.get('id_prueba')
     # critical_locators = request.form.getlist('critical_locators')
 
@@ -41,7 +43,7 @@ def upload_and_compare_file():
             'broken_locators': broken_locators
         })
     else:
-        return jsonify({'error': 'Invalid file type.'}), 400
+        raise RequestException(message="Invalid file type", code=400)
     
 @api.route('/pruebas', methods=['GET'])
 def get_pruebas():
@@ -53,7 +55,7 @@ def get_prueba_by_id(id):
     prueba = getPruebaById(id)
     if prueba:
         return jsonify({"prueba":prueba})
-    return jsonify("Prueba no encontrada"), 404
+    raise RequestException(message="Test not found", code=404)
 
 @api.route('/pruebas/<int:id>', methods=['PUT'])
 def update_prueba_by_id(id):
@@ -67,7 +69,7 @@ def update_prueba_by_id(id):
         result = schema.dump(prueba)
         return jsonify({"prueba": result})
 
-    return jsonify("Prueba no encontrada"), 404
+    raise RequestException(message="Test not found", code=404)
 
 @api.route('/pruebas/<int:id>', methods=['DELETE'])
 def delete_prueba(id):

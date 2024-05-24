@@ -1,6 +1,6 @@
 from app import db
 from app.api.model import Codigo, Reporte, Prueba
-from app.controller import validate_schema_data
+from app.controller import  RequestException
 from app.api.schema import CodigoSchema, ReporteSchema, PruebaSchema, prueba_dump_schema, prueba_load_schema
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -126,6 +126,8 @@ def compare_files_and_generate_report(new_file_path, original_url, file_content,
         db.session.commit()
 
         return report_path, total_changes, broken_locators
+    # except Exception as e:
+    #     raise RequestException(message=e.messages, code=400)
     finally:
         driver.quit()
 
