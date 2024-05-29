@@ -2,6 +2,7 @@ from app import db
 from app.base import Base
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import Integer, String, DateTime, Boolean, ForeignKey, Text
+from sqlalchemy.dialects.postgresql import ARRAY
 
 class Prueba(Base):
     __tablename__ = 'prueba'
@@ -26,7 +27,7 @@ class Reporte(Base):
     id_reporte: Mapped[int] = mapped_column(Integer, primary_key=True)
     fecha: Mapped[DateTime] = mapped_column(DateTime, default=db.func.current_timestamp())
     contenido: Mapped[str] = mapped_column(Text, nullable=False)
-    id_prueba: Mapped[int] = mapped_column(Integer, ForeignKey('prueba.id_prueba'))
+    id_pruebas: Mapped[ARRAY] = mapped_column(ARRAY(Integer), nullable=True)
     id_codigo: Mapped[int] = mapped_column(Integer, ForeignKey('codigo.id_codigo'))  # Asegúrate de que este campo esté definido
 
 class Elemento(Base):
