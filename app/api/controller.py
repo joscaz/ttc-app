@@ -79,7 +79,7 @@ def capture_all_locators(driver, url):
     locators = [get_xpath_for_element(e) for e in elements if e.tag_name != 'html']
     return locators
 
-def compare_files_and_generate_report(new_file_path, original_url, file_content, id_prueba):
+def compare_files_and_generate_report(new_file_path, original_url, file_content, id_pruebas):
     # Configurar el WebDriver
     driver = webdriver.Edge()
     
@@ -88,9 +88,9 @@ def compare_files_and_generate_report(new_file_path, original_url, file_content,
         db.session.add(new_code)
         db.session.commit()  # Asegúrate de que se guarda correctamente y obtiene un ID
 
-        critical_locators = capture_all_locators(driver, original_url)
         # Cargar la página original
         driver.get(original_url)
+        critical_locators_original = capture_all_locators(driver, original_url)
         wait_for_page_load(driver)
         original_elements = driver.find_elements(By.XPATH, '//*')
         original_data = capture_element_data(original_elements)
@@ -100,6 +100,12 @@ def compare_files_and_generate_report(new_file_path, original_url, file_content,
         wait_for_page_load(driver)
         new_elements = driver.find_elements(By.XPATH, '//*')
         new_data = capture_element_data(new_elements)
+        critical_locators_new = capture_all_locators(driver, 'file:///' + new_file_path)
+
+            # Identificar locators rotos y nuevos
+        broken_locators_original = [loc for loc in critical_locators_original if loc not in critical_locators_new]
+        broken_locators_new = [loc for loc in critical_locators_new if loc not in critical_locators_original]
+
 
         # Comparar los datos capturados
         differences = []
@@ -108,24 +114,22 @@ def compare_files_and_generate_report(new_file_path, original_url, file_content,
                 differences.append({'Original': original, 'New': new})
 
         # Verificar localizadores críticos en la página nueva
-        broken_locators = check_critical_locators(driver, critical_locators)
+        # broken_locators = check_critical_locators(driver, critical_locators)
         total_changes = len(differences)
 
         # Crear reporte xlsx solo con locators rotos
-        df = pd.DataFrame(broken_locators, columns=['Broken Locators'])
-        if df.empty:
-            df.loc[0] = ['No broken locators found']
-        else:
-            df.loc[len(df)] = {'Broken Locators': f'Total broken locators: {len(broken_locators)}'}
+        df_original = pd.DataFrame(broken_locators_original, columns=['Original broken/missing locators'])
+        df_new = pd.DataFrame(broken_locators_new, columns=['New added/broken locators'])
+        df_combined = pd.concat([df_original, df_new], axis=1)
         report_path = 'prueba.xlsx'
-        df.to_excel(report_path, index=False)
+        df_combined.to_excel(report_path, index=False)
 
         # Instanciar y guardar el reporte
-        new_report = Reporte(contenido=str(broken_locators),id_prueba=id_prueba, id_codigo=new_code.id_codigo)
+        new_report = Reporte(contenido=str(broken_locators_original + broken_locators_new), id_pruebas=id_pruebas, id_codigo=new_code.id_codigo)
         db.session.add(new_report)
         db.session.commit()
 
-        return report_path, total_changes, broken_locators
+        return report_path, total_changes, broken_locators_original, broken_locators_new
     # except Exception as e:
     #     raise RequestException(message=e.messages, code=400)
     finally:

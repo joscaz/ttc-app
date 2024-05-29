@@ -10,6 +10,14 @@ def get_url_prefix():
 
 api = Blueprint('ttc-api', __name__, url_prefix=get_url_prefix())
 
+def validate_schema_data(schema, data):
+  try:
+    loaded_data = schema.load(data)
+  except ValidationError as err:
+    raise RequestException(message=err.messages, code=400)
+
+  return loaded_data
+
 def log_request_error(request_data, code):
     # Log the request data and the error
     current_app.logger.error(f"Error {code} at {request_data['url']}")
