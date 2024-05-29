@@ -1,11 +1,14 @@
 from flask import jsonify, request, current_app, Response
-from app.api.controller import (compare_files_and_generate_report, getPruebas, getPruebaById, editPruebaById, deletePrueba)
-from app.api.controller import (validate_schema_data, RequestException)
+from app import db
+from app.api.controller import (RequestException, compare_files_and_generate_report, getPruebas, getPruebaById, editPruebaById, deletePrueba)
+from app.api.model import Prueba
 # from app.api.utils import (format_report)
 from app.api.schema import prueba_load_schema, prueba_dump_schema
 from app.api.dummy import (create_dummy_pruebas)
 from app.controller import api
 from werkzeug.utils import secure_filename
+from app.api.utils import test_mappings
+import pytest
 import os
 
 
@@ -18,15 +21,29 @@ def get_version():
 def upload_and_compare_file():
     file = request.files['file']
     original_url = request.form.get('original_url')
-    # ids_pruebas_str = request.form.get('id_pruebas')  # IDs como cadena separada por comas
-    # id_pruebas = [int(id) for id in ids_pruebas_str.split(',') if id.strip().isdigit()]
-    id_prueba = request.form.get('id_prueba')
+    ids_pruebas_str = request.form.get('id_pruebas')  # IDs como cadena separada por comas
+    id_pruebas = [int(id) for id in ids_pruebas_str.split(',') if id.strip().isdigit()]
+    # id_prueba = request.form.get('id_prueba')
     # critical_locators = request.form.getlist('critical_locators')
 
     if file and file.filename.endswith('.html'):
         filename = secure_filename(file.filename)
         filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
+
+        # Iniciar pruebas pytest
+        results = {}
+        for id_prueba in id_pruebas:
+            if id_prueba in test_mappings:
+                result = pytest.main(['-k', test_mappings[id_prueba]])
+                results[id_prueba] = result == 0  # True si la prueba pasó, False si falló
+                # Registrar en la base de datos
+                new_prueba = Prueba(
+                    nombre_prueba=test_mappings[id_prueba],
+                    estado=(result == 0),
+                    cambio_aceptado=False
+                )
+                db.session.add(new_prueba)
 
         # Leer el contenido del archivo subido
         with open(filepath, 'r', encoding='utf-8') as f:
@@ -39,6 +56,8 @@ def upload_and_compare_file():
             'message': 'Report generated successfully.',
             'report_path': report_path,
             'total_changes': total_changes,
+            'tests_passed': sum(results.values()),
+            'tests_failed': len(results) - sum(results.values()),
             'critical_locators_broken': len(broken_locators),
             'broken_locators': broken_locators
         })
