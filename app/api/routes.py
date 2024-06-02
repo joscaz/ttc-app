@@ -50,16 +50,22 @@ def upload_and_compare_file():
             file_content = f.read()
 
         # Comparar archivos y generar reporte
-        report_path, total_changes, broken_locators_original, broken_locators_new = compare_files_and_generate_report(filepath, original_url, file_content, id_pruebas)
+        (report_path, 
+         broken_locators_original,
+         broken_locators_new,
+         suggestions) = compare_files_and_generate_report(filepath,
+                                                          original_url,
+                                                          file_content,
+                                                          id_pruebas)
 
         return jsonify({
             'message': 'Report generated successfully.',
             'report_path': report_path,
-            'total_changes': total_changes,
             'tests_passed': sum(results.values()),
             'tests_failed': len(results) - sum(results.values()),
             'broken_locators_original': len(broken_locators_original),
             'broken_locators_new': len(broken_locators_new),
+            'suggestions': suggestions,
             'broken_locators_details': {
                 'original': broken_locators_original,
                 'new': broken_locators_new

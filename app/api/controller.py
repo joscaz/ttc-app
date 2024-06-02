@@ -1,7 +1,8 @@
 from app import db
-from app.api.model import Codigo, Reporte, Prueba
+from app.api.model import Codigo, Reporte, Prueba, Elemento
 from app.controller import  RequestException
-from app.api.schema import CodigoSchema, ReporteSchema, PruebaSchema, prueba_dump_schema, prueba_load_schema
+from app.api.utils import Trie
+from app.api.schema import (PruebaSchema)
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
@@ -10,8 +11,6 @@ from selenium.webdriver.remote.webelement import WebElement
 # from sqlalchemy.exc import SQLAlchemyError
 import pandas as pd
 import logging
-import datetime
-# from app.api.utils import (compare_elements, wait_for_page_load, capture_element_data)
 
 # Configuración del logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -21,9 +20,6 @@ def wait_for_page_load(driver):
         lambda d: d.execute_script('return document.readyState') == 'complete'
     )
 
-def capture_element_data(elements):
-    return [{'tag': e.tag_name, 'text': e.text, 'attributes': e.get_attribute('outerHTML'), 'xpath': e.get_attribute('xpath')} for e in elements]
-
 def check_critical_locators(driver, locators):
     broken_locators = []
     for locator in locators:
@@ -32,21 +28,6 @@ def check_critical_locators(driver, locators):
         except NoSuchElementException:
             broken_locators.append(locator)
     return broken_locators
-
-# critical_locators = [
-#     '//img[@alt="TTC Logo"]',
-#     '//h1[@id="titulo"]',
-#     '//div[@class="mission-vision"]/h2[1]',
-#     '//div[@class="mission-vision"]/h2[2]',
-#     '//p[@id="adios"]',
-#     '//img[@alt="Python"]',
-#     '//img[@alt="Selenium"]',
-#     '//img[@alt="AWS"]',
-#     '//div[@class="nombres"]/h4[1]',
-#     '//div[@class="nombres"]/h4[2]',
-#     '//div[@class="nombres"]/h4[3]'
-#     # Añade otros XPaths críticos aquí.
-# ]
 
 def get_xpath_for_element(element: WebElement) -> str:
     """
@@ -82,40 +63,44 @@ def capture_all_locators(driver, url):
 def compare_files_and_generate_report(new_file_path, original_url, file_content, id_pruebas):
     # Configurar el WebDriver
     driver = webdriver.Edge()
+    locator_trie = Trie()
     
     try:
         new_code = Codigo(nombre_archivo='archivo_a_probar', contenido=file_content)
         db.session.add(new_code)
-        db.session.commit()  # Asegúrate de que se guarda correctamente y obtiene un ID
+        db.session.commit()
 
-        # Cargar la página original
+        # Cargar página original
         driver.get(original_url)
         critical_locators_original = capture_all_locators(driver, original_url)
         wait_for_page_load(driver)
-        original_elements = driver.find_elements(By.XPATH, '//*')
-        original_data = capture_element_data(original_elements)
 
-        # Cargar la página del archivo subido
+        # Cargar página del archivo subido
         driver.get('file:///' + new_file_path)
         wait_for_page_load(driver)
-        new_elements = driver.find_elements(By.XPATH, '//*')
-        new_data = capture_element_data(new_elements)
         critical_locators_new = capture_all_locators(driver, 'file:///' + new_file_path)
 
-            # Identificar locators rotos y nuevos
+        # Identificar locators rotos y nuevos
         broken_locators_original = [loc for loc in critical_locators_original if loc not in critical_locators_new]
         broken_locators_new = [loc for loc in critical_locators_new if loc not in critical_locators_original]
 
+        # Registrar localizadores rotos y nuevos en la base de datos
+        for idx, locator in enumerate(broken_locators_original):
+            locator_trie.insert(locator)
+            new_element = Elemento(nombre=f'Original{idx}', localizador=locator, estado=False)  # Estado False por defecto
+            db.session.add(new_element)
+        
+        for idx, locator in enumerate(broken_locators_new):
+            new_element = Elemento(nombre=f'New{idx}', localizador=locator, estado=False)  # Estado False por defecto
+            db.session.add(new_element)
 
-        # Comparar los datos capturados
-        differences = []
-        for original, new in zip(original_data, new_data):
-            if original['text'] != new['text'] or original['attributes'] != new['attributes']:
-                differences.append({'Original': original, 'New': new})
+        db.session.commit()
 
-        # Verificar localizadores críticos en la página nueva
-        # broken_locators = check_critical_locators(driver, critical_locators)
-        total_changes = len(differences)
+        suggestions = {}
+        for locator in broken_locators_new:
+            suggested_locators = locator_trie.starts_with(locator)
+            if suggested_locators:
+                suggestions[locator] = suggested_locators
 
         # Crear reporte xlsx solo con locators rotos
         df_original = pd.DataFrame(broken_locators_original, columns=['Original broken/missing locators'])
@@ -129,7 +114,7 @@ def compare_files_and_generate_report(new_file_path, original_url, file_content,
         db.session.add(new_report)
         db.session.commit()
 
-        return report_path, total_changes, broken_locators_original, broken_locators_new
+        return report_path, broken_locators_original, broken_locators_new, suggestions
     # except Exception as e:
     #     raise RequestException(message=e.messages, code=400)
     finally:
