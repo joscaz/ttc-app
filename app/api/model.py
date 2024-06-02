@@ -37,7 +37,6 @@ class Elemento(Base):
     nombre: Mapped[str] = mapped_column(String(100), nullable=False)
     localizador: Mapped[str] = mapped_column(String(200), nullable=False)
     estado: Mapped[bool] = mapped_column(Boolean, nullable=False)
-    id_prueba: Mapped[int] = mapped_column(Integer, ForeignKey('prueba.id_prueba'))
 
 class Codigo(Base):
     __tablename__ = 'codigo'
