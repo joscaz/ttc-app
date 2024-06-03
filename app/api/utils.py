@@ -44,6 +44,6 @@ class Trie:
         if node.is_end_of_word:
             words.append(prefix)
         for char, child_node in node.children.items():
-            if child_node is not TrieNode:  # Asegura que child_node es una instancia
+            if isinstance(child_node, TrieNode):  # Corregir la comprobación de instancia
                 words.extend(self._collect_all_words(child_node, prefix + char))
         return words

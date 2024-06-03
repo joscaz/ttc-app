@@ -11,6 +11,8 @@ from selenium.webdriver.remote.webelement import WebElement
 # from sqlalchemy.exc import SQLAlchemyError
 import pandas as pd
 import logging
+from thefuzz import fuzz
+import re
 
 # Configuración del logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -60,6 +62,24 @@ def capture_all_locators(driver, url):
     locators = [get_xpath_for_element(e) for e in elements if e.tag_name != 'html']
     return locators
 
+def extract_tag_type(xpath):
+    # Esta función extrae el tipo de etiqueta del final del XPath
+    match = re.search(r'(?<=//)\w+', xpath)
+    if match:
+        return match.group(0)
+    return None
+
+def suggest_locator(broken_locator, candidate_locators):
+    # Encuentra el locator candidato más similar al roto
+    best_match = None
+    highest_score = 0
+    for candidate in candidate_locators:
+        score = fuzz.ratio(broken_locator, candidate)
+        if score > highest_score:
+            highest_score = score
+            best_match = (candidate, score)
+    return best_match
+
 def compare_files_and_generate_report(new_file_path, original_url, file_content, id_pruebas):
     # Configurar el WebDriver
     driver = webdriver.Edge()
@@ -98,9 +118,11 @@ def compare_files_and_generate_report(new_file_path, original_url, file_content,
 
         suggestions = {}
         for locator in broken_locators_new:
-            suggested_locators = locator_trie.starts_with(locator)
-            if suggested_locators:
-                suggestions[locator] = suggested_locators
+            match = suggest_locator(locator, broken_locators_original)
+            if match:
+                suggested_locator, score = match
+                if score > 70:
+                    suggestions[locator] = {'suggestion': suggested_locator, 'score': score}
 
         # Crear reporte xlsx solo con locators rotos
         df_original = pd.DataFrame(broken_locators_original, columns=['Original broken/missing locators'])
