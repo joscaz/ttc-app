@@ -5,7 +5,7 @@ from app.api.model import Prueba
 # from app.api.utils import (format_report)
 from app.api.schema import prueba_load_schema, prueba_dump_schema
 from app.api.dummy import (create_dummy_pruebas)
-from app.controller import api
+from app.controller import (api, validate_schema_data)
 from werkzeug.utils import secure_filename
 from app.api.utils import test_mappings
 import pytest
@@ -50,16 +50,26 @@ def upload_and_compare_file():
             file_content = f.read()
 
         # Comparar archivos y generar reporte
-        report_path, total_changes, broken_locators = compare_files_and_generate_report(filepath, original_url, file_content, id_prueba)
+        (report_path, 
+         broken_locators_original,
+         broken_locators_new,
+         suggestions) = compare_files_and_generate_report(filepath,
+                                                          original_url,
+                                                          file_content,
+                                                          id_pruebas)
 
         return jsonify({
             'message': 'Report generated successfully.',
             'report_path': report_path,
-            'total_changes': total_changes,
             'tests_passed': sum(results.values()),
             'tests_failed': len(results) - sum(results.values()),
-            'critical_locators_broken': len(broken_locators),
-            'broken_locators': broken_locators
+            'broken_locators_original': len(broken_locators_original),
+            'broken_locators_new': len(broken_locators_new),
+            'suggestions': suggestions,
+            'broken_locators_details': {
+                'original': broken_locators_original,
+                'new': broken_locators_new
+            }
         })
     else:
         raise RequestException(message="Invalid file type", code=400)
