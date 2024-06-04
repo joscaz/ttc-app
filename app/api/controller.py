@@ -1,20 +1,15 @@
 from app import db
 from app.api.model import Codigo, Reporte, Prueba, Elemento
-from app.controller import  RequestException
-from app.api.utils import Trie
 from app.api.schema import (PruebaSchema)
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.remote.webelement import WebElement
-# from sqlalchemy.exc import SQLAlchemyError
 import pandas as pd
 import logging
 from thefuzz import fuzz
-import re
 
-# Configuración del logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def wait_for_page_load(driver):
@@ -62,13 +57,6 @@ def capture_all_locators(driver, url):
     locators = [get_xpath_for_element(e) for e in elements if e.tag_name != 'html']
     return locators
 
-def extract_tag_type(xpath):
-    # Esta función extrae el tipo de etiqueta del final del XPath
-    match = re.search(r'(?<=//)\w+', xpath)
-    if match:
-        return match.group(0)
-    return None
-
 def suggest_locator(broken_locator, candidate_locators):
     # Encuentra el locator candidato más similar al roto
     best_match = None
@@ -83,7 +71,6 @@ def suggest_locator(broken_locator, candidate_locators):
 def compare_files_and_generate_report(new_file_path, original_url, file_content, id_pruebas):
     # Configurar el WebDriver
     driver = webdriver.Edge()
-    locator_trie = Trie()
     
     try:
         new_code = Codigo(nombre_archivo='archivo_a_probar', contenido=file_content)
@@ -106,7 +93,6 @@ def compare_files_and_generate_report(new_file_path, original_url, file_content,
 
         # Registrar localizadores rotos y nuevos en la base de datos
         for idx, locator in enumerate(broken_locators_original):
-            locator_trie.insert(locator)
             new_element = Elemento(nombre=f'Original{idx}', localizador=locator, estado=False)  # Estado False por defecto
             db.session.add(new_element)
         
@@ -130,8 +116,7 @@ def compare_files_and_generate_report(new_file_path, original_url, file_content,
         df_combined = pd.concat([df_original, df_new], axis=1)
         report_path = 'prueba.xlsx'
         df_combined.to_excel(report_path, index=False)
-
-        # Instanciar y guardar el reporte
+        
         new_report = Reporte(contenido=str(broken_locators_original + broken_locators_new), id_pruebas=id_pruebas, id_codigo=new_code.id_codigo)
         db.session.add(new_report)
         db.session.commit()
