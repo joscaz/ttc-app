@@ -1,21 +1,13 @@
-from flask import jsonify, request, current_app, Response
+from flask import jsonify, request, current_app
 from app import db
-from app.api.controller import (RequestException, compare_files_and_generate_report, getPruebas, getPruebaById, editPruebaById, deletePrueba)
-from app.api.model import Prueba
-# from app.api.utils import (format_report)
-from app.api.schema import prueba_load_schema, prueba_dump_schema
-from app.api.dummy import (create_dummy_pruebas)
-from app.controller import (api, validate_schema_data)
+from app.api.reporte.controller import (compare_files_and_generate_report)
+from app.api.prueba.model import Prueba
+from app.controller import RequestException
+from app.controller import api
 from werkzeug.utils import secure_filename
-from app.api.utils import test_mappings
+from app.api.reporte.utils import test_mappings
 import pytest
 import os
-
-
-@api.route('/version', methods=['GET'])
-def get_version():
-    create_dummy_pruebas()
-    return "version hola"
 
 @api.route('/upload', methods=['POST'])
 def upload_and_compare_file():
@@ -23,8 +15,6 @@ def upload_and_compare_file():
     original_url = request.form.get('original_url')
     ids_pruebas_str = request.form.get('id_pruebas')  # IDs como cadena separada por comas
     id_pruebas = [int(id) for id in ids_pruebas_str.split(',') if id.strip().isdigit()]
-    # id_prueba = request.form.get('id_prueba')
-    # critical_locators = request.form.getlist('critical_locators')
 
     if file and file.filename.endswith('.html'):
         filename = secure_filename(file.filename)
@@ -73,37 +63,3 @@ def upload_and_compare_file():
         })
     else:
         raise RequestException(message="Invalid file type", code=400)
-    
-@api.route('/pruebas', methods=['GET'])
-def get_pruebas():
-    count, pruebas = getPruebas()
-    return jsonify({"Cantidad de pruebas: ": count, "Pruebas: ": pruebas})
-
-@api.route('/pruebas/<int:id>', methods=['GET'])
-def get_prueba_by_id(id):
-    prueba = getPruebaById(id)
-    if prueba:
-        return jsonify({"prueba":prueba})
-    raise RequestException(message="Test not found", code=404)
-
-@api.route('/pruebas/<int:id>', methods=['PUT'])
-def update_prueba_by_id(id):
-    schema = prueba_load_schema()  
-    loaded_data = validate_schema_data(schema, request.get_json())
-    prueba = getPruebaById(id)
-
-    if prueba:
-        prueba = editPruebaById(id, loaded_data)
-        schema = prueba_dump_schema()
-        result = schema.dump(prueba)
-        return jsonify({"prueba": result})
-
-    raise RequestException(message="Test not found", code=404)
-
-@api.route('/pruebas/<int:id>', methods=['DELETE'])
-def delete_prueba(id):
-    prueba = getPruebaById(id)
-
-    if prueba:
-        deletePrueba(prueba)
-        return Response(status=204)

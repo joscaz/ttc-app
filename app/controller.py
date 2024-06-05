@@ -78,4 +78,4 @@ def request_exception(e):
 
 flask_app.register_error_handler(RequestException, request_exception)
 
-import app.api.routes
+import app.api.upload.routes

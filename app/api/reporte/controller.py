@@ -1,6 +1,5 @@
 from app import db
-from app.api.model import Codigo, Reporte, Prueba, Elemento
-from app.api.schema import (PruebaSchema)
+from app.api.codigo.model import Codigo, Reporte, Elemento
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
@@ -126,4 +125,3 @@ def compare_files_and_generate_report(new_file_path, original_url, file_content,
     #     raise RequestException(message=e.messages, code=400)
     finally:
         driver.quit()
-
