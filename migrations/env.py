@@ -1,5 +1,3 @@
-from app.api.prueba.model import Prueba
-from app.api.codigo.model import Reporte, Codigo, Elemento, Version
 import logging
 from logging.config import fileConfig
 

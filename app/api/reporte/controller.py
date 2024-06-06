@@ -1,5 +1,5 @@
 from app import db
-from app.api.codigo.model import Codigo, Reporte, Elemento
+from app.api.codigo.model import Codigo
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By

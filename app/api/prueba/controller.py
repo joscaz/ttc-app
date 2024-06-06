@@ -1,5 +1,6 @@
+from app import db
 from app.api.prueba.model import Prueba
-from app.api.codigo.schema import (PruebaSchema)
+from app.api.prueba.schema import (PruebaSchema)
 
 def getPruebas():
     pruebas = Prueba.query.all()
