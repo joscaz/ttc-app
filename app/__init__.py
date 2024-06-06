@@ -31,6 +31,12 @@ flask_app.logger.addHandler(handler)
 def healthcheck():
   return 'Healthy'
 
+import app.api.codigo.model
+import app.api.elemento.model
+import app.api.prueba.model
+import app.api.reporte.model
+import app.api.version.model
+
 from app.controller import api as api_module
 
 flask_app.register_blueprint(api_module)
