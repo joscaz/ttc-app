@@ -158,6 +158,7 @@ cython_debug/
 
 #upload file folder
 files_uploaded/
+*.pem
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
