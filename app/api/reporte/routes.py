@@ -24,7 +24,8 @@ def upload_and_compare_file():
     file = request.files['file']
     original_url = request.form.get('original_url')
     ids_pruebas_str = request.form.get('id_pruebas')  # IDs como cadena separada por comas
-    id_pruebas = [int(id) for id in ids_pruebas_str.split(',') if id.strip().isdigit()]
+    if ids_pruebas_str:
+        id_pruebas = [int(id) for id in ids_pruebas_str.split(',') if id.strip().isdigit()]
 
     if file and file.filename.endswith('.html'):
         filename = secure_filename(file.filename)
