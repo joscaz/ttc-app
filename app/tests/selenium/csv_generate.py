@@ -8,7 +8,7 @@ import logging
 # Configuración del logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-options = webdriver.ChromeOptions()
+options = Options()
 options.add_argument("--headless")
 options.add_argument("window-size=1400,1500")
 options.add_argument("--disable-gpu")
@@ -19,7 +19,7 @@ options.add_argument("--disable-infobars")
 options.add_argument("--disable-dev-shm-usage")
 
 # Configuración del driver de Selenium
-driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)  # Opciones: Chrome, Firefox, etc.
+driver = webdriver.Chrome(options=options)  # Opciones: Chrome, Firefox, etc.
 url = "https://c3.ai/"
 
 try:

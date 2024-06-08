@@ -9,7 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoAlertPresentException
 from selenium.webdriver.common.keys import Keys
 
-options = webdriver.ChromeOptions()
+options = Options()
 options.add_argument("--headless")
 options.add_argument("window-size=1400,1500")
 options.add_argument("--disable-gpu")
@@ -21,7 +21,7 @@ options.add_argument("--disable-dev-shm-usage")
 
 @pytest.fixture(scope='session')
 def driver():
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+    driver = webdriver.Chrome(options=options)
     driver.get("http://127.0.0.1:5500/app/tests/selenium/htmlPages/loginPageTest.html")
     yield driver
     driver.quit()

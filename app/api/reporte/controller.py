@@ -13,7 +13,7 @@ import pandas as pd
 import logging
 from thefuzz import fuzz
 
-options = webdriver.ChromeOptions()
+options = Options()
 options.add_argument("--headless")
 options.add_argument("window-size=1400,1500")
 options.add_argument("--disable-gpu")
@@ -83,7 +83,7 @@ def suggest_locator(broken_locator, candidate_locators):
 
 def compare_files_and_generate_report(new_file_path, original_url, file_content, id_pruebas):
     # Configurar el WebDriver
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+    driver = webdriver.Chrome(options=options)
     
     try:
         new_code = Codigo(nombre_archivo='archivo_a_probar', contenido=file_content)
