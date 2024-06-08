@@ -33,17 +33,19 @@ def upload_and_compare_file():
 
         # Iniciar pruebas pytest
         results = {}
-        for id_prueba in id_pruebas:
-            if id_prueba in test_mappings:
-                result = pytest.main(['-k', test_mappings[id_prueba]])
-                results[id_prueba] = result == 0  # True si la prueba pasó, False si falló
-                # Registrar en la base de datos
-                new_prueba = Prueba(
-                    nombre_prueba=test_mappings[id_prueba],
-                    estado=(result == 0),
-                    cambio_aceptado=False
-                )
-                db.session.add(new_prueba)
+
+        if ids_pruebas_str:
+            for id_prueba in id_pruebas:
+                if id_prueba in test_mappings:
+                    result = pytest.main(['-k', test_mappings[id_prueba]])
+                    results[id_prueba] = result == 0  # True si la prueba pasó, False si falló
+                    # Registrar en la base de datos
+                    new_prueba = Prueba(
+                        nombre_prueba=test_mappings[id_prueba],
+                        estado=(result == 0),
+                        cambio_aceptado=False
+                    )
+                    db.session.add(new_prueba)
 
         # Leer el contenido del archivo subido
         with open(filepath, 'r', encoding='utf-8') as f:
