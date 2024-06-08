@@ -19,7 +19,7 @@ options.add_argument("--disable-infobars")
 options.add_argument("--disable-dev-shm-usage")
 
 # Configuración del driver de Selenium
-driver = webdriver.Chrome(options=options)  # Opciones: Chrome, Firefox, etc.
+driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)  # Opciones: Chrome, Firefox, etc.
 url = "https://c3.ai/"
 
 try:
