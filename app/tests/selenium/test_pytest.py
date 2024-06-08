@@ -9,7 +9,7 @@ from selenium.webdriver.common.keys import Keys
 
 @pytest.fixture(scope='session')
 def driver():
-    driver = webdriver.Edge()
+    driver = webdriver.Chrome()
     driver.get("http://127.0.0.1:5500/app/tests/selenium/htmlPages/loginPageTest.html")
     yield driver
     driver.quit()

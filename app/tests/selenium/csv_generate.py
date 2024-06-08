@@ -7,7 +7,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Configuración del driver de Selenium
-driver = webdriver.Edge()  # Opciones: Chrome, Firefox, etc.
+driver = webdriver.Chrome()  # Opciones: Chrome, Firefox, etc.
 url = "https://c3.ai/"
 
 try:
