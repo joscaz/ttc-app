@@ -21,7 +21,7 @@ chrome_options.add_argument("--disable-dev-shm-usage")
 
 @pytest.fixture(scope='session')
 def driver():
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+    driver = webdriver.Chrome(options=chrome_options)
     driver.get("http://127.0.0.1:5500/app/tests/selenium/htmlPages/loginPageTest.html")
     yield driver
     driver.quit()

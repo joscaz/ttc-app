@@ -13,7 +13,7 @@ chrome_options.add_argument("enable-automation")
 chrome_options.add_argument("--disable-infobars")
 chrome_options.add_argument("--disable-dev-shm-usage")
 
-driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+driver = webdriver.Chrome(options=chrome_options)
 
 # driver.get("https://www.selenium.dev/selenium/web/web-form.html")
 driver.get("http://127.0.0.1:5500/app/tests/selenium/htmlPages/loginPageTest.html")
