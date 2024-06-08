@@ -22,7 +22,7 @@ chrome_options.add_argument("--disable-dev-shm-usage")
 @pytest.fixture(scope='session')
 def driver():
     driver = webdriver.Chrome(options=chrome_options)
-    driver.get("http://127.0.0.1:5500/app/tests/selenium/htmlPages/loginPageTest.html")
+    driver.get("https://tests-html-deploy-bdxy1jdln-joscazs-projects.vercel.app/")
     yield driver
     driver.quit()
 
@@ -87,7 +87,7 @@ def test_login_with_invalid_credentials(driver):
 
 # Comprobar que las imágenes estén cargadas
 def test_loading_images(driver):
-    driver.get('http://127.0.0.1:5500/app/tests/selenium/htmlPages/mainPageTest.html')
+    driver.get('https://tests-html-deploy-bdxy1jdln-joscazs-projects.vercel.app/')
     imagenes = driver.find_elements(by=By.ID, value="img")
     for imagen in imagenes:
         assert imagen.is_displayed(), "La imagen no se ha cargado correctamente"
@@ -95,14 +95,14 @@ def test_loading_images(driver):
  
 # Comprobar titulo
 def test_main_page_title(driver):
-    driver.get('http://127.0.0.1:5500/app/tests/selenium/htmlPages/mainPageTest.html')
+    driver.get('https://tests-html-deploy-bdxy1jdln-joscazs-projects.vercel.app/')
     elemento_titulo = driver.find_element(by=By.ID, value="titulo")
     texto_esperado = "AutoRefine"
     assert elemento_titulo.text == texto_esperado, f"El texto del título es '{elemento_titulo.text}', pero se esperaba '{texto_esperado}'"
 
 # Comprobar los párrafos
 def test_paragraph_quantity(driver):
-    driver.get('http://127.0.0.1:5500/app/tests/selenium/htmlPages/mainPageTest.html')
+    driver.get('https://tests-html-deploy-bdxy1jdln-joscazs-projects.vercel.app/')
     parrafos_esperados = 2
     parrafos = driver.find_elements(by=By.TAG_NAME, value="p")
     assert len(parrafos) == parrafos_esperados, f"La cantidad de párrafos no es la esperada. Se esperaban {parrafos_esperados}, pero se encontraron {len(parrafos)}"
