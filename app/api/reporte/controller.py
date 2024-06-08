@@ -5,7 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import (NoSuchElementException, StaleElementReferenceException)
 from app.api.elemento.model import Elemento
 from app.api.reporte.model import Reporte
 from selenium.webdriver.remote.webelement import WebElement
@@ -24,6 +24,21 @@ chrome_options.add_argument("--disable-infobars")
 chrome_options.add_argument("--disable-dev-shm-usage")
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def capture_all_locators(driver, url):
+    max_attempts = 5
+    attempts = 0
+    while attempts < max_attempts:
+        try:
+            driver.get(url)
+            wait_for_page_load(driver)
+            elements = driver.find_elements(By.XPATH, '//*')
+            locators = [get_xpath_for_element(e) for e in elements if e.tag_name != 'html']
+            return locators
+        except StaleElementReferenceException:
+            attempts += 1
+            print(f"Intentando nuevamente ({attempts}/{max_attempts}): StaleElementReferenceException")
+    raise Exception("No se pudo capturar todos los localizadores después de varios intentos.")
 
 def wait_for_page_load(driver):
     WebDriverWait(driver, 10).until(
@@ -63,12 +78,6 @@ def get_xpath_for_element(element: WebElement) -> str:
         parts.insert(0, part)
         element = element.find_element(By.XPATH, '..')
     return '//' + '/'.join(parts)
-
-def capture_all_locators(driver, url):
-    driver.get(url)
-    elements = driver.find_elements(By.XPATH, '//*')
-    locators = [get_xpath_for_element(e) for e in elements if e.tag_name != 'html']
-    return locators
 
 def suggest_locator(broken_locator, candidate_locators):
     # Encuentra el locator candidato más similar al roto
