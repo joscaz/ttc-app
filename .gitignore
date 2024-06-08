@@ -156,8 +156,6 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-migrations/
-
 #upload file folder
 files_uploaded/
 *.pem
