@@ -115,11 +115,11 @@ def compare_files_and_generate_report(new_file_path, original_url, file_content,
 
         # Registrar localizadores rotos y nuevos en la base de datos
         for idx, locator in enumerate(broken_locators_original):
-            new_element = Elemento(nombre=f'Original{idx}', localizador=locator, estado=False)  # Estado False por defecto
+            new_element = Elemento(nombre=f'Original{idx}', localizador=locator[:200], estado=False)  # Estado False por defecto
             db.session.add(new_element)
         
         for idx, locator in enumerate(broken_locators_new):
-            new_element = Elemento(nombre=f'New{idx}', localizador=locator, estado=False)  # Estado False por defecto
+            new_element = Elemento(nombre=f'New{idx}', localizador=locator[:200], estado=False)  # Estado False por defecto
             db.session.add(new_element)
 
         db.session.commit()
