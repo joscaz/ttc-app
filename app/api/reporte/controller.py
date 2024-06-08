@@ -3,6 +3,7 @@ from app.api.codigo.model import Codigo
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
 from app.api.elemento.model import Elemento
 from app.api.reporte.model import Reporte
@@ -10,6 +11,16 @@ from selenium.webdriver.remote.webelement import WebElement
 import pandas as pd
 import logging
 from thefuzz import fuzz
+
+options = Options()
+options.add_argument("--headless")
+options.add_argument("window-size=1400,1500")
+options.add_argument("--disable-gpu")
+options.add_argument("--no-sandbox")
+options.add_argument("start-maximized")
+options.add_argument("enable-automation")
+options.add_argument("--disable-infobars")
+options.add_argument("--disable-dev-shm-usage")
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -71,7 +82,7 @@ def suggest_locator(broken_locator, candidate_locators):
 
 def compare_files_and_generate_report(new_file_path, original_url, file_content, id_pruebas):
     # Configurar el WebDriver
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(options=options)
     
     try:
         new_code = Codigo(nombre_archivo='archivo_a_probar', contenido=file_content)
