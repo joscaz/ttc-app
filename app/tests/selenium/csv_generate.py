@@ -8,7 +8,7 @@ import logging
 # Configuración del logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-options = Options()
+options = webdriver.ChromeOptions()
 options.add_argument("--headless")
 options.add_argument("window-size=1400,1500")
 options.add_argument("--disable-gpu")
