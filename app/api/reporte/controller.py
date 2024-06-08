@@ -71,7 +71,7 @@ def suggest_locator(broken_locator, candidate_locators):
 
 def compare_files_and_generate_report(new_file_path, original_url, file_content, id_pruebas):
     # Configurar el WebDriver
-    driver = webdriver.Edge()
+    driver = webdriver.Chrome()
     
     try:
         new_code = Codigo(nombre_archivo='archivo_a_probar', contenido=file_content)
