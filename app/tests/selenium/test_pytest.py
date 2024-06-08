@@ -2,6 +2,7 @@ import pytest
 from selenium import webdriver
 # from selenium.webdriver.support.wait import WebDriverWait
 # from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.by import By
@@ -20,7 +21,7 @@ options.add_argument("--disable-dev-shm-usage")
 
 @pytest.fixture(scope='session')
 def driver():
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
     driver.get("http://127.0.0.1:5500/app/tests/selenium/htmlPages/loginPageTest.html")
     yield driver
     driver.quit()

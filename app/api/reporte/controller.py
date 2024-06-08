@@ -3,6 +3,7 @@ from app.api.codigo.model import Codigo
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
 from app.api.elemento.model import Elemento
@@ -82,7 +83,7 @@ def suggest_locator(broken_locator, candidate_locators):
 
 def compare_files_and_generate_report(new_file_path, original_url, file_content, id_pruebas):
     # Configurar el WebDriver
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
     
     try:
         new_code = Codigo(nombre_archivo='archivo_a_probar', contenido=file_content)
