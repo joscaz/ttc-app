@@ -4,6 +4,8 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+from app.api.elemento.model import Elemento
+from app.api.reporte.model import Reporte
 from selenium.webdriver.remote.webelement import WebElement
 import pandas as pd
 import logging
@@ -112,8 +114,10 @@ def compare_files_and_generate_report(new_file_path, original_url, file_content,
         # Crear reporte xlsx solo con locators rotos
         df_original = pd.DataFrame(broken_locators_original, columns=['Original broken/missing locators'])
         df_new = pd.DataFrame(broken_locators_new, columns=['New added/broken locators'])
-        df_combined = pd.concat([df_original, df_new], axis=1)
-        report_path = 'prueba.xlsx'
+        df_empty = pd.DataFrame([["", ""] for _ in range(max(len(df_original), len(df_new)))], columns=[' ', ' '])
+        df_suggestions = pd.DataFrame([(k, v['suggestion'], v['score']) for k, v in suggestions.items()], columns=['Original locator', 'Suggestion', 'Score'])
+        df_combined = pd.concat([df_original, df_new, df_empty, df_suggestions], axis=1)
+        report_path = 'excel_files/prueba.xlsx'
         df_combined.to_excel(report_path, index=False)
         
         new_report = Reporte(contenido=str(broken_locators_original + broken_locators_new), id_pruebas=id_pruebas, id_codigo=new_code.id_codigo)

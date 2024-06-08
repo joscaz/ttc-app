@@ -1,4 +1,4 @@
-from flask import jsonify, request, current_app
+from flask import jsonify, request, current_app, send_from_directory
 from app import db
 from app.api.reporte.controller import (compare_files_and_generate_report)
 from app.api.prueba.model import Prueba
@@ -9,6 +9,16 @@ from app.api.reporte.utils import test_mappings
 import pytest
 import os
 
+@api.route('/download_excel', methods=['GET'])
+def download_excel():
+    directory = current_app.config['EXCEL_FOLDER'] # El directorio donde se guardan los archivos generados
+    print(directory)
+    filename = "prueba.xlsx"  # El nombre del archivo que quieres enviar
+    try:
+        return send_from_directory(directory, filename, as_attachment=True)
+    except FileNotFoundError:
+        return jsonify({"error": "File not found"}), 404
+    
 @api.route('/upload', methods=['POST'])
 def upload_and_compare_file():
     file = request.files['file']

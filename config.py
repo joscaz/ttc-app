@@ -2,7 +2,8 @@
 import os
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-UPLOAD_FOLDER = '/Users/josecarloszertuche/Documents/Programacion TEC/6to semestre/ttc-app/files_uploaded/'
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "files_uploaded")
+EXCEL_FOLDER = os.path.join(BASE_DIR, "excel_files")
 
 # Define the database - we are working with
 DB_HOST = os.environ.get('DB_HOST')

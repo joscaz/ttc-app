@@ -156,8 +156,11 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+/migrations/
+
 #upload file folder
 files_uploaded/
+*.pem
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
