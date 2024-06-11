@@ -80,3 +80,4 @@ flask_app.register_error_handler(RequestException, request_exception)
 
 import app.api.reporte.routes
 import app.api.prueba.routes
+import app.api.version.routes
