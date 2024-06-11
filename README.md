@@ -10,3 +10,6 @@ Equipo de trabajo:
 - Diego Rodríguez Dávila
 - Bryan Alejandro Cortés Guzmán
 - Antonio Alejandro Chávez Ramos
+
+Dashboard repo:
+https://github.com/bryancortes/cloud-autorefine
