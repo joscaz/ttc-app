@@ -2,7 +2,7 @@ from flask import jsonify, request, current_app, Response
 from app.controller import (RequestException, api, validate_schema_data)
 from app.api.prueba.controller import (getPruebas, getPruebaById, editPruebaById, deletePrueba)
 from app.api.prueba.schema import prueba_load_schema, prueba_dump_schema
-
+  
 @api.route('/pruebas', methods=['GET'])
 def get_pruebas():
     count, pruebas = getPruebas()
