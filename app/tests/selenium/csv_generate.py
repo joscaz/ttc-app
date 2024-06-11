@@ -7,18 +7,18 @@ import logging
 # Configuración del logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-options = Options()
-options.add_argument("--headless")
-options.add_argument("window-size=1400,1500")
-options.add_argument("--disable-gpu")
-options.add_argument("--no-sandbox")
-options.add_argument("start-maximized")
-options.add_argument("enable-automation")
-options.add_argument("--disable-infobars")
-options.add_argument("--disable-dev-shm-usage")
+chrome_options = webdriver.ChromeOptions()
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("window-size=1400,1500")
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("start-maximized")
+chrome_options.add_argument("enable-automation")
+chrome_options.add_argument("--disable-infobars")
+chrome_options.add_argument("--disable-dev-shm-usage")
 
 # Configuración del driver de Selenium
-driver = webdriver.Chrome(options=options)  # Opciones: Chrome, Firefox, etc.
+driver = webdriver.Chrome(options=chrome_options)  # Opciones: Chrome, Firefox, etc.
 url = "https://c3.ai/"
 
 try:

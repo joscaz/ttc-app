@@ -12,15 +12,15 @@ import pandas as pd
 import logging
 from thefuzz import fuzz
 
-options = Options()
-options.add_argument("--headless")
-options.add_argument("window-size=1400,1500")
-options.add_argument("--disable-gpu")
-options.add_argument("--no-sandbox")
-options.add_argument("start-maximized")
-options.add_argument("enable-automation")
-options.add_argument("--disable-infobars")
-options.add_argument("--disable-dev-shm-usage")
+chrome_options = webdriver.ChromeOptions()
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("window-size=1400,1500")
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("start-maximized")
+chrome_options.add_argument("enable-automation")
+chrome_options.add_argument("--disable-infobars")
+chrome_options.add_argument("--disable-dev-shm-usage")
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -91,7 +91,7 @@ def suggest_locator(broken_locator, candidate_locators):
 
 def compare_files_and_generate_report(new_file_path, original_url, file_content, id_pruebas):
     # Configurar el WebDriver
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(options=chrome_options)
     
     try:
         new_code = Codigo(nombre_archivo='archivo_a_probar', contenido=file_content)
@@ -114,11 +114,11 @@ def compare_files_and_generate_report(new_file_path, original_url, file_content,
 
         # Registrar localizadores rotos y nuevos en la base de datos
         for idx, locator in enumerate(broken_locators_original):
-            new_element = Elemento(nombre=f'Original{idx}', localizador=locator, estado=False)  # Estado False por defecto
+            new_element = Elemento(nombre=f'Original{idx}', localizador=locator[:200], estado=False)  # Estado False por defecto
             db.session.add(new_element)
         
         for idx, locator in enumerate(broken_locators_new):
-            new_element = Elemento(nombre=f'New{idx}', localizador=locator, estado=False)  # Estado False por defecto
+            new_element = Elemento(nombre=f'New{idx}', localizador=locator[:200], estado=False)  # Estado False por defecto
             db.session.add(new_element)
 
         db.session.commit()

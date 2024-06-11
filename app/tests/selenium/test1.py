@@ -2,17 +2,17 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
-options = Options()
-options.add_argument("--headless")
-options.add_argument("window-size=1400,1500")
-options.add_argument("--disable-gpu")
-options.add_argument("--no-sandbox")
-options.add_argument("start-maximized")
-options.add_argument("enable-automation")
-options.add_argument("--disable-infobars")
-options.add_argument("--disable-dev-shm-usage")
+chrome_options = webdriver.ChromeOptions()
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("window-size=1400,1500")
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("start-maximized")
+chrome_options.add_argument("enable-automation")
+chrome_options.add_argument("--disable-infobars")
+chrome_options.add_argument("--disable-dev-shm-usage")
 
-driver = webdriver.Chrome(options=options)
+driver = webdriver.Chrome(options=chrome_options)
 
 # driver.get("https://www.selenium.dev/selenium/web/web-form.html")
 driver.get("http://127.0.0.1:5500/app/tests/selenium/htmlPages/loginPageTest.html")
