@@ -140,3 +140,18 @@ def compare_files_and_generate_report(new_file_path, original_url, file_content,
     #     raise RequestException(message=e.messages, code=400)
     finally:
         driver.quit()
+
+def updateSuggestion(locator, action):
+    elemento = Elemento.query.filter_by(localizador=locator).first()
+    if not elemento:
+        return {'error': 'Element not found', 'status': 404}
+
+    if action == 'accept':
+        elemento.estado = True  # Marcar como aceptado
+    elif action == 'decline':
+        elemento.estado = False  # Marcar como rechazado
+    else:
+        return {'error': 'Invalid action', 'status': 400}
+
+    db.session.commit()
+    return {'message': 'Update successful', 'status': 200}  

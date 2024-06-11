@@ -1,6 +1,6 @@
 from flask import jsonify, request, current_app, send_from_directory
 from app import db
-from app.api.reporte.controller import (compare_files_and_generate_report)
+from app.api.reporte.controller import (compare_files_and_generate_report, updateSuggestion)
 from app.api.prueba.model import Prueba
 from app.controller import RequestException
 from app.controller import api
@@ -18,6 +18,15 @@ def download_excel():
         return send_from_directory(directory, filename, as_attachment=True)
     except FileNotFoundError:
         return jsonify({"error": "File not found"}), 404
+    
+@api.route('/update_suggestion', methods=['POST'])
+def update_suggestion():
+    data = request.get_json()
+    locator = data['locator']
+    action = data['action']
+    print('Locator received:', locator)
+    response = updateSuggestion(locator, action)
+    return jsonify(response)
     
 @api.route('/upload', methods=['POST'])
 def upload_and_compare_file():
