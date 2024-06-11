@@ -2,8 +2,7 @@ from flask import jsonify, request, current_app, send_from_directory
 from app import db
 from app.api.reporte.controller import (compare_files_and_generate_report, updateSuggestion)
 from app.api.prueba.model import Prueba
-from app.controller import RequestException
-from app.controller import api
+from app.controller import (RequestException, api)
 from werkzeug.utils import secure_filename
 from app.api.reporte.utils import test_mappings
 import pytest
